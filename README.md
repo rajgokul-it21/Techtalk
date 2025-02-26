@@ -2,7 +2,7 @@ TO RUN THIS PROJECT
 
 COMMENTS
 
-git clone <reponame>
+git clone repourl
 
 
 cd backend -----> and ----> npm install -------> and ----> nodemon server.js
