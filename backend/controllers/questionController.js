@@ -1,36 +1,9 @@
 import Question from "../models/Question.js";
 
-// ✅ Upvote a question
-export const upvoteQuestion = async (req, res) => {
-  try {
-    const question = await Question.findById(req.params.id);
-    if (!question) return res.status(404).json({ message: "Question not found" });
-
-    question.upvotes += 1;
-    await question.save();
-
-    res.json({ message: "Question upvoted successfully", upvotes: question.upvotes });
-  } catch (error) {
-    res.status(500).json({ message: "Server Error" });
-  }
-};
-
-// ✅ Downvote a question
-export const downvoteQuestion = async (req, res) => {
-  try {
-    const question = await Question.findById(req.params.id);
-    if (!question) return res.status(404).json({ message: "Question not found" });
-
-    question.downvotes += 1;
-    await question.save();
-
-    res.json({ message: "Question downvoted successfully", downvotes: question.downvotes });
-  } catch (error) {
-    res.status(500).json({ message: "Server Error" });
-  }
-};
+// ✅ Upvote or Downvote a Question
 
 
+// ✅ Improved Vote Handling
 export const voteQuestion = async (req, res) => {
   try {
     const { voteType } = req.body; // "upvote" or "downvote"
@@ -74,14 +47,11 @@ export const voteQuestion = async (req, res) => {
 };
 
 
-
-// @desc   Ask a new question
-// @route  POST /api/questions/ask
-// @access Private
+// ✅ Ask a new Question
 export const askQuestion = async (req, res) => {
-  const { title, description, tags } = req.body;
-
   try {
+    const { title, description, tags } = req.body;
+
     const question = new Question({
       user: req.user._id,
       title,
@@ -92,29 +62,26 @@ export const askQuestion = async (req, res) => {
     const savedQuestion = await question.save();
     res.status(201).json(savedQuestion);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error in asking question:", error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
-// @desc   Get all questions
-// @route  GET /api/questions
-// @access Public
+// ✅ Get All Questions
 export const getAllQuestions = async (req, res) => {
   try {
     const questions = await Question.find()
       .populate("user", "name email") // Get question owner's name & email
       .populate("answers.user", "name email"); // Get answer authors' name & email
+
     res.status(200).json(questions);
   } catch (error) {
+    console.error("Error fetching questions:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
 
-
-// @desc   Get a single question with answers
-// @route  GET /api/questions/:id
-// @access Public
-
+// ✅ Get a Single Question by ID
 export const getQuestionById = async (req, res) => {
   try {
     const question = await Question.findById(req.params.id)
@@ -127,14 +94,12 @@ export const getQuestionById = async (req, res) => {
 
     res.status(200).json(question);
   } catch (error) {
+    console.error("Error fetching question:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
 
-
-// @desc   Answer a question
-// @route  POST /api/questions/:id/answer
-// @access Private
+// ✅ Answer a Question
 export const answerQuestion = async (req, res) => {
   try {
     const question = await Question.findById(req.params.id);
@@ -144,17 +109,15 @@ export const answerQuestion = async (req, res) => {
 
     const newAnswer = {
       content: req.body.content,
-      user: req.user.id, // Make sure req.user is set in protect middleware
+      user: req.user._id, // Ensure `req.user` is set by protect middleware
     };
-    console.log("User making the request:", req.user);
 
     question.answers.push(newAnswer);
     await question.save();
 
-    res.status(201).json(question); // Return updated question with answers
+    res.status(201).json(question);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error adding answer:", error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
-
-

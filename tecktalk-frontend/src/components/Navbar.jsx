@@ -40,36 +40,38 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-gray-800 text-white p-4 flex justify-between">
-      <Link to="/" className="text-xl font-bold">TeckTalk</Link>
-      <div className="flex items-center space-x-4">
-        {token ? (
-          <>
-            <Link to="/" className="mr-4">Home</Link>
-            <Link to="/ask" className="mr-4">Ask Question</Link>
-            
-            {/* User Section with Icon */}
-            {username && (
-              <div className="flex items-center space-x-2 bg-gray-700 px-3 py-1 rounded-lg">
-                <UserCircle size={20} /> {/* ✅ User Icon */}
-                <span className="font-semibold">{username}</span>
-              </div>
-            )}
-            
-            <button onClick={handleLogout} className="bg-red-500 px-3 py-1 rounded hover:bg-red-600">
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" className="mr-4">Login</Link>
-            <Link to="/register" className="bg-blue-500 px-3 py-1 rounded hover:bg-blue-600">
-              Register
-            </Link>
-          </>
-        )}
-      </div>
-    </nav>
+          <nav className="bg-gray-800 text-white p-4 flex justify-between fixed top-0 left-0 w-full z-50 shadow-md">
+        <Link to="/" className="text-xl font-bold">TeckTalk</Link>
+        <div className="flex items-center space-x-4">
+          {token ? (
+            <>
+              <Link to="/" className="mr-4">Home</Link>
+              <Link to="/ask" className="mr-4">Ask Question</Link>
+
+              {/* User Section with Icon */}
+              {username && (
+                <div className="flex items-center space-x-2 bg-gray-700 px-3 py-1 rounded-lg">
+                  <UserCircle size={20} /> {/* ✅ User Icon */}
+                  <span className="font-semibold">{username}</span>
+                </div>
+              )}
+
+              <button onClick={handleLogout} className="bg-red-500 px-3 py-1 rounded hover:bg-red-600">
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="mr-4">Login</Link>
+              <Link to="/register" className="bg-blue-500 px-3 py-1 rounded hover:bg-blue-600">
+                Register
+              </Link>
+            </>
+          )}
+        </div>
+      </nav>
+
+
   );
 };
 

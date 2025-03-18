@@ -1,17 +1,26 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUp, ArrowDown, MessageSquare } from "lucide-react"; // Import icons
+import { ArrowBigUp, ArrowBigDown, MessageSquare, Search } from "lucide-react";
 
 const Home = () => {
   const [questions, setQuestions] = useState([]);
   const [selectedTag, setSelectedTag] = useState("");
+  const [tagSearch, setTagSearch] = useState(""); // Search input state
+  const [dropdownOpen, setDropdownOpen] = useState(false); // Control dropdown visibility
 
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
         const response = await fetch("http://localhost:5000/api/questions");
         const data = await response.json();
-        setQuestions(data);
+
+        const updatedQuestions = data.map((q) => ({
+          ...q,
+          upvotes: q.votes.filter((v) => v.type === "upvote").length,
+          downvotes: q.votes.filter((v) => v.type === "downvote").length,
+        }));
+
+        setQuestions(updatedQuestions);
       } catch (error) {
         console.error("Error fetching questions:", error);
       }
@@ -28,7 +37,7 @@ const Home = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Ensure user is authenticated
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({ voteType }),
         }
@@ -39,7 +48,12 @@ const Home = () => {
         setQuestions((prevQuestions) =>
           prevQuestions.map((q) =>
             q._id === questionId
-              ? { ...q, upvotes: data.upvotes, downvotes: data.downvotes }
+              ? {
+                  ...q,
+                  upvotes: data.upvotes,
+                  downvotes: data.downvotes,
+                  userVote: q.userVote === voteType ? null : voteType, // Toggle vote
+                }
               : q
           )
         );
@@ -49,27 +63,80 @@ const Home = () => {
     }
   };
 
+  // Extract unique tags from questions
+  const allTags = [...new Set(questions.flatMap((q) => q.tags))];
+
+  // Filter tags based on search input
+  const filteredTags = allTags.filter((tag) =>
+    tag.toLowerCase().includes(tagSearch.toLowerCase())
+  );
+
   return (
-    <div className="max-w-6xl mx-auto p-6 flex">
-      {/* Sidebar for Tags */}
-      <aside className="w-1/4 p-4 bg-gray-100 rounded-lg shadow-md">
+    <div className="max-w-6xl mx-auto p-6 pt-16 flex">
+      {/* Left Sidebar (Fixed) */}
+      <aside className="w-1/4 p-4 bg-gray-100 rounded-lg shadow-md h-screen sticky top-16">
         <h3 className="text-lg font-bold mb-3">Filter by Tag</h3>
-        <select
-          className="p-2 border border-gray-300 rounded w-full"
-          onChange={(e) => setSelectedTag(e.target.value)}
-          value={selectedTag}
-        >
-          <option value="">All</option>
-          {[...new Set(questions.flatMap((q) => q.tags))].map((tag, index) => (
-            <option key={index} value={tag}>
-              {tag}
-            </option>
-          ))}
-        </select>
+
+        {/* Dropdown with Search */}
+        <div className="relative">
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="p-2 border border-gray-300 rounded w-full text-left bg-white"
+          >
+            {selectedTag ? `#${selectedTag}` : "Select a Tag"}
+          </button>
+
+          {dropdownOpen && (
+            <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded shadow-lg z-10">
+              {/* Search Input Inside Dropdown with Icon */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search tags..."
+                  value={tagSearch}
+                  onChange={(e) => setTagSearch(e.target.value)}
+                  className="p-2 pl-10 border-b border-gray-300 w-full"
+                />
+              </div>
+
+              {/* Tags List */}
+              <div className="max-h-40 overflow-y-auto">
+                <div
+                  onClick={() => {
+                    setSelectedTag("");
+                    setDropdownOpen(false);
+                  }}
+                  className="p-2 hover:bg-gray-200 cursor-pointer"
+                >
+                  All
+                </div>
+                {filteredTags.length > 0 ? (
+                  filteredTags.map((tag, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        setSelectedTag(tag);
+                        setDropdownOpen(false);
+                      }}
+                      className={`p-2 cursor-pointer ${
+                        selectedTag === tag ? "bg-blue-500 text-white" : "hover:bg-gray-200"
+                      }`}
+                    >
+                      #{tag}
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-2 text-gray-500">No tags found</div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="w-3/4 ml-6">
+      {/* Questions List (Scrollable) */}
+      <div className="w-3/4 ml-6 h-screen overflow-y-auto">
         <h1 className="text-3xl font-bold mb-4">Latest Questions</h1>
         {questions.length === 0 ? (
           <p>No questions found.</p>
@@ -82,7 +149,6 @@ const Home = () => {
                   key={q._id}
                   className="p-4 bg-gray-900 text-white shadow-md rounded-lg border border-gray-700"
                 >
-                  {/* Question Title */}
                   <Link
                     to={`/question/${q._id}`}
                     className="text-blue-400 text-xl font-semibold hover:underline"
@@ -94,7 +160,6 @@ const Home = () => {
                     <strong>Asked by:</strong> {q.user?.name || "Unknown"}
                   </p>
 
-                  {/* Tags */}
                   <div className="mt-2">
                     {q.tags.map((tag, index) => (
                       <span
@@ -106,34 +171,36 @@ const Home = () => {
                     ))}
                   </div>
 
-                  {/* Upvote, Downvote & Comments */}
-                  <div className="flex items-center space-x-4 text-gray-400 text-sm mt-3">
-                    {/* Upvote */}
+                  {/* Vote UI */}
+                  <div className="flex items-center gap-3 mt-3 border border-gray-600 rounded-full px-3 py-1">
+                    {/* Upvote Button */}
                     <button
                       onClick={() => handleVote(q._id, "upvote")}
-                      className={`flex items-center space-x-1 ${
-                        q.userVote === "upvote" ? "text-blue-500" : ""
-                      } hover:text-blue-500`}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-full ${
+                        q.userVote === "upvote"
+                          ? "text-blue-500 border border-blue-500 bg-blue-900/20"
+                          : "text-gray-400 hover:text-blue-400"
+                      } transition`}
                     >
-                      <ArrowUp className="w-5 h-5" />
-                      <span className="font-medium">Upvote</span>
-                      <span className="text-gray-300">· {q.upvotes || 0}</span>
+                      <ArrowBigUp size={20} />
+                      <span className="text-sm">Upvote · {q.upvotes || 0}</span>
                     </button>
 
-                    {/* Downvote */}
+                    {/* Downvote Button */}
                     <button
                       onClick={() => handleVote(q._id, "downvote")}
-                      className="flex items-center hover:text-gray-500"
+                      className={`flex items-center gap-1 px-2 py-1 rounded-full ${
+                        q.userVote === "downvote"
+                          ? "text-red-500 border border-red-500 bg-red-900/20"
+                          : "text-gray-400 hover:text-red-400"
+                      } transition`}
                     >
-                      <ArrowDown className="w-5 h-5" />
+                      <ArrowBigDown size={20} />
                     </button>
 
-                    {/* Comments (Number of Answers) */}
-                    <Link
-                      to={`/question/${q._id}`}
-                      className="flex items-center space-x-1 hover:text-gray-300"
-                    >
-                      <MessageSquare className="w-5 h-5" />
+                    {/* Comment Button */}
+                    <Link to={`/question/${q._id}`} className="flex items-center gap-1 text-gray-400 hover:text-gray-300">
+                      <MessageSquare size={18} />
                       <span>{q.answers?.length || 0}</span>
                     </Link>
                   </div>
