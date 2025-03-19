@@ -74,66 +74,67 @@ const Home = () => {
   return (
     <div className="max-w-6xl mx-auto p-6 pt-16 flex">
       {/* Left Sidebar (Fixed) */}
-      <aside className="w-1/4 p-4 bg-gray-100 rounded-lg shadow-md h-screen sticky top-16">
-        <h3 className="text-lg font-bold mb-3">Filter by Tag</h3>
+      <aside className="w-1/4 p-4 bg-gray-800 text-white rounded-lg shadow-md h-screen sticky top-16 border border-gray-700">
+  <h3 className="text-lg font-bold mb-3">Filter by Tag</h3>
 
-        {/* Dropdown with Search */}
+  {/* Dropdown with Search */}
+  <div className="relative">
+    <button
+      onClick={() => setDropdownOpen(!dropdownOpen)}
+      className="p-2 border border-gray-600 rounded w-full text-left bg-gray-700 text-white"
+    >
+      {selectedTag ? `#${selectedTag}` : "Select a Tag"}
+    </button>
+
+    {dropdownOpen && (
+      <div className="absolute mt-1 w-full bg-gray-800 border border-gray-700 rounded shadow-lg z-10">
+        {/* Search Input Inside Dropdown with Icon */}
         <div className="relative">
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="p-2 border border-gray-300 rounded w-full text-left bg-white"
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          <input
+            type="text"
+            placeholder="Search tags..."
+            value={tagSearch}
+            onChange={(e) => setTagSearch(e.target.value)}
+            className="p-2 pl-10 border-b border-gray-700 w-full bg-gray-800 text-white"
+          />
+        </div>
+
+        {/* Tags List */}
+        <div className="max-h-40 overflow-y-auto">
+          <div
+            onClick={() => {
+              setSelectedTag("");
+              setDropdownOpen(false);
+            }}
+            className="p-2 hover:bg-gray-700 cursor-pointer"
           >
-            {selectedTag ? `#${selectedTag}` : "Select a Tag"}
-          </button>
-
-          {dropdownOpen && (
-            <div className="absolute mt-1 w-full bg-white border border-gray-300 rounded shadow-lg z-10">
-              {/* Search Input Inside Dropdown with Icon */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="text"
-                  placeholder="Search tags..."
-                  value={tagSearch}
-                  onChange={(e) => setTagSearch(e.target.value)}
-                  className="p-2 pl-10 border-b border-gray-300 w-full"
-                />
+            All
+          </div>
+          {filteredTags.length > 0 ? (
+            filteredTags.map((tag, index) => (
+              <div
+                key={index}
+                onClick={() => {
+                  setSelectedTag(tag);
+                  setDropdownOpen(false);
+                }}
+                className={`p-2 cursor-pointer ${
+                  selectedTag === tag ? "bg-blue-500 text-white" : "hover:bg-gray-700"
+                }`}
+              >
+                #{tag}
               </div>
-
-              {/* Tags List */}
-              <div className="max-h-40 overflow-y-auto">
-                <div
-                  onClick={() => {
-                    setSelectedTag("");
-                    setDropdownOpen(false);
-                  }}
-                  className="p-2 hover:bg-gray-200 cursor-pointer"
-                >
-                  All
-                </div>
-                {filteredTags.length > 0 ? (
-                  filteredTags.map((tag, index) => (
-                    <div
-                      key={index}
-                      onClick={() => {
-                        setSelectedTag(tag);
-                        setDropdownOpen(false);
-                      }}
-                      className={`p-2 cursor-pointer ${
-                        selectedTag === tag ? "bg-blue-500 text-white" : "hover:bg-gray-200"
-                      }`}
-                    >
-                      #{tag}
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-2 text-gray-500">No tags found</div>
-                )}
-              </div>
-            </div>
+            ))
+          ) : (
+            <div className="p-2 text-gray-400">No tags found</div>
           )}
         </div>
-      </aside>
+      </div>
+    )}
+  </div>
+</aside>
+
 
       {/* Questions List (Scrollable) */}
       <div className="w-3/4 ml-6 h-screen overflow-y-auto">
@@ -142,23 +143,24 @@ const Home = () => {
           <p>No questions found.</p>
         ) : (
           <ul className="space-y-4">
-            {questions
-              .filter((q) => (selectedTag ? q.tags.includes(selectedTag) : true))
-              .map((q) => (
-                <li
-                  key={q._id}
-                  className="p-4 bg-gray-900 text-white shadow-md rounded-lg border border-gray-700"
-                >
+          {questions
+            .filter((q) => (selectedTag ? q.tags.includes(selectedTag) : true))
+            .map((q) => (
+              <li
+                key={q._id}
+                className="p-4 bg-gray-900 text-white shadow-md rounded-lg border border-gray-700"
+              >
+                {/* Display username first, followed by the question */}
+                <h2 className="text-gray-500 text-sm">
+                  <span className=" text-xl text-blue-400 font-bold">{q.user?.name || "Unknown"}</span> :
                   <Link
-                    to={`/question/${q._id}`}
-                    className="text-blue-400 text-xl font-semibold hover:underline"
-                  >
-                    {q.title}
-                  </Link>
-                  <p className="text-gray-400 mt-2">{q.description}</p>
-                  <p className="text-gray-500 text-sm mt-1">
-                    <strong>Asked by:</strong> {q.user?.name || "Unknown"}
-                  </p>
+            to={`/question/${q._id}`}
+            className="text-xl font-semibold text-white hover:underline"
+          >
+            {" "}{q.title}
+          </Link>
+                </h2>
+                <p className="text-gray-400 mt-2">{q.description}</p>
 
                   <div className="mt-2">
                     {q.tags.map((tag, index) => (

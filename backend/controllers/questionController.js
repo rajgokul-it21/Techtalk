@@ -1,8 +1,87 @@
 import Question from "../models/Question.js";
 
+
+// ✅ Reply to an Answer
+// ✅ Reply to an Answer
+export const replyToAnswer = async (req, res) => {
+  try {
+    const { answerId, content } = req.body;
+    const userId = req.user._id;
+
+    const question = await Question.findById(req.params.id);
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    const answer = question.answers.id(answerId);
+    if (!answer) {
+      return res.status(404).json({ message: "Answer not found" });
+    }
+
+    const newReply = { user: userId, content };
+    answer.replies.push(newReply);
+    
+    await question.save();
+
+    res.status(201).json({ success: true, replies: answer.replies });
+  } catch (error) {
+    console.error("Error adding reply:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
+// ✅ Upvote or Downvote an Answer
+export const voteAnswer = async (req, res) => {
+  try {
+    const { answerId, voteType } = req.body; // "upvote" or "downvote"
+    const userId = req.user._id;
+
+    const question = await Question.findById(req.params.id);
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    const answer = question.answers.id(answerId);
+    if (!answer) {
+      return res.status(404).json({ message: "Answer not found" });
+    }
+
+    // Find existing vote
+    const existingVoteIndex = answer.votes.findIndex(
+      (vote) => vote.user.toString() === userId.toString()
+    );
+
+    if (existingVoteIndex !== -1) {
+      const existingVote = answer.votes[existingVoteIndex];
+
+      // If the same vote type is clicked again, remove the vote
+      if (existingVote.type === voteType) {
+        answer.votes.splice(existingVoteIndex, 1);
+      } else {
+        // Otherwise, update the vote type
+        answer.votes[existingVoteIndex].type = voteType;
+      }
+    } else {
+      // If no existing vote, add a new vote
+      answer.votes.push({ user: userId, type: voteType });
+    }
+
+    await question.save();
+
+    // Calculate updated vote counts
+    const upvotes = answer.votes.filter((v) => v.type === "upvote").length;
+    const downvotes = answer.votes.filter((v) => v.type === "downvote").length;
+
+    res.json({ success: true, upvotes, downvotes });
+  } catch (error) {
+    console.error("Error voting on answer:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
 // ✅ Upvote or Downvote a Question
-
-
 // ✅ Improved Vote Handling
 export const voteQuestion = async (req, res) => {
   try {
@@ -85,8 +164,14 @@ export const getAllQuestions = async (req, res) => {
 export const getQuestionById = async (req, res) => {
   try {
     const question = await Question.findById(req.params.id)
-      .populate("user", "name email") // Get question owner's name & email
-      .populate("answers.user", "name email"); // Get answer authors' name & email
+    .populate("user", "name") // Populate question author's name
+    .populate({
+      path: "answers",
+      populate: [
+        { path: "user", select: "name" }, // Populate answer author's name
+        { path: "replies.user", select: "name" } // Populate reply author's name
+      ],
+    });// Get answer authors' name & email
 
     if (!question) {
       return res.status(404).json({ message: "Question not found" });
