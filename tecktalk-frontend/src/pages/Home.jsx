@@ -11,7 +11,7 @@ const Home = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/questions");
+        const response = await fetch(`${process.env.base_url}/api/questions`);
         const data = await response.json();
 
         const updatedQuestions = data.map((q) => ({
@@ -32,7 +32,7 @@ const Home = () => {
   const handleVote = async (questionId, voteType) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/questions/${questionId}/vote`,
+        `${process.env.base_url}/api/questions/${questionId}/vote`,
         {
           method: "POST",
           headers: {

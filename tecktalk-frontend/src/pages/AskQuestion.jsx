@@ -90,7 +90,7 @@ const AskQuestion = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/questions/ask", {
+      const response = await fetch(`${process.env.base_url}/api/questions/ask`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

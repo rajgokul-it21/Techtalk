@@ -13,7 +13,7 @@ const Navbar = () => {
       if (!token) return;
 
       try {
-        const response = await fetch("http://localhost:5000/api/users/profile", {
+        const response = await fetch(`${process.env.base_url}/api/users/profile`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

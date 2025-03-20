@@ -13,7 +13,7 @@ const QuestionDetail = () => {
   // Fetch question details
   const fetchQuestion = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/questions/${id}`);
+      const response = await fetch(`${process.env.base_url}/api/questions/${id}`);
       if (!response.ok) throw new Error("Failed to fetch question");
       const data = await response.json();
       setQuestion(data);
@@ -34,7 +34,7 @@ const QuestionDetail = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/questions/${id}/answer`,
+        `${process.env.base_url}/api/questions/${id}/answer`,
         {
           method: "POST",
           headers: {
@@ -61,7 +61,7 @@ const QuestionDetail = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/questions/${id}/answer/vote`,
+        `${process.env.base_url}/api/questions/${id}/answer/vote`,
         {
           method: "POST",
           headers: {
@@ -89,7 +89,7 @@ const QuestionDetail = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/questions/${id}/answer/reply`,
+        `${process.env.base_url}/api/questions/${id}/answer/reply`,
         {
           method: "POST",
           headers: {
