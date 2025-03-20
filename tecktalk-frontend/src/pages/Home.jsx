@@ -72,7 +72,7 @@ const Home = () => {
   );
 
   return (
-    <div className="max-w-6xl mx-auto p-6 pt-16 flex">
+    <div className="max-w-6xl mx-auto p-6 pt-16 flex "  >
       {/* Left Sidebar (Fixed) */}
       <aside className="w-1/4 p-4 bg-gray-800 text-white rounded-lg shadow-md h-screen sticky top-16 border border-gray-700">
   <h3 className="text-lg font-bold mb-3">Filter by Tag</h3>
@@ -138,7 +138,7 @@ const Home = () => {
 
       {/* Questions List (Scrollable) */}
       <div className="w-3/4 ml-6 h-screen overflow-y-auto">
-        <h1 className="text-3xl font-bold mb-4">Latest Questions</h1>
+        <h1 className="text-3xl text-white font-bold mb-4">Latest Questions</h1>
         {questions.length === 0 ? (
           <p>No questions found.</p>
         ) : (

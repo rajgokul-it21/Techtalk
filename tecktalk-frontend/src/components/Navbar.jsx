@@ -40,7 +40,7 @@ const Navbar = () => {
   };
 
   return (
-          <nav className="bg-gray-800 text-white p-4 flex justify-between fixed top-0 left-0 w-full z-50 shadow-md">
+          <nav className="bg-gray-800 text-white p-4 flex justify-between sticky top-0 left-0 w-full z-50 shadow-md">
         <Link to="/" className="text-xl font-bold">TeckTalk</Link>
         <div className="flex items-center space-x-4">
           {token ? (
