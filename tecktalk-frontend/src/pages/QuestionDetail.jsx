@@ -8,7 +8,7 @@ const QuestionDetail = () => {
   const [question, setQuestion] = useState(null);
   const [newAnswer, setNewAnswer] = useState("");
   const [replyContent, setReplyContent] = useState({});
-  const [showReplyInput, setShowReplyInput] = useState({}); // Controls reply input visibility
+  const [showReplyInput, setShowReplyInput] = useState({});
 
   // Fetch question details
   const fetchQuestion = async () => {
@@ -103,7 +103,7 @@ const QuestionDetail = () => {
       if (!response.ok) throw new Error("Failed to submit reply");
 
       setReplyContent({ ...replyContent, [answerId]: "" });
-      setShowReplyInput({ ...showReplyInput, [answerId]: false }); // Close reply input
+      setShowReplyInput({ ...showReplyInput, [answerId]: false });
       fetchQuestion();
     } catch (error) {
       console.error("Error submitting reply:", error.message);
@@ -113,13 +113,13 @@ const QuestionDetail = () => {
   if (!question) return <p>Loading...</p>;
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 bg-gray-900 text-white shadow-md rounded-lg border border-gray-700">
+    <div className="max-w-3xl mx-auto mt-10 p-6 bg-gray-900 text-white shadow-md rounded-lg border border-gray-700 max-h-[80vh] overflow-y-auto scroll-smooth">
       <h2 className="text-2xl font-bold mb-2">
-      <span className="text-blue-400">{question.user?.name || "Unknown"}</span>: {question.title}
+        <span className="text-blue-400">{question.user?.name || "Unknown"}</span>: {question.title}
       </h2>
       <p className="text-gray-300">{question.description}</p>
 
-      {/* Answer Input Form (Now Below Answers) */}
+      {/* Answer Input Form */}
       <form onSubmit={handleSubmitAnswer} className="mt-6">
         <textarea
           className="w-full p-3 border border-gray-600 bg-gray-800 text-white rounded"
@@ -172,13 +172,13 @@ const QuestionDetail = () => {
               </div>
 
               {/* Reply Section */}
-              <div className="mt-4">
+              <div className="mt-4 max-h-40 overflow-y-auto border border-gray-700 p-3 rounded-lg scroll-smooth">
                 <button
                   className="text-blue-400 hover:underline"
                   onClick={() =>
                     setShowReplyInput((prev) => ({
                       ...prev,
-                      [answer._id]: !prev[answer._id], // Toggle visibility
+                      [answer._id]: !prev[answer._id],
                     }))
                   }
                 >
